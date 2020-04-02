@@ -1,18 +1,33 @@
-# Mission Analysis v0.01
-
-This code use orekit to make satellites propagation and visibility calculations related to ground stations.
+# JSatOrb REST API
 
 ## Prerequisites
 - Python3
 - Orekit, hyparchus and bottle must be installed
 
 ## Launch the service
+Activate the JSatOrb virtual environment:
 ```
-python MissionAnalysisREST.py
+conda activate JSatOrbEnv
+```
+Launch the service:
+```
+python JSatOrbREST.py
 ```
 By default the service is going to run on the **port 8000**
 
-## Propagation Request Example
+## Date conversion module request example
+Route : /dateconversion', POST method
+```json
+{
+  "header": {
+    "dateToConvert": "2011-12-01T16:43:45",
+    "targetFormat": "JD"
+  }
+}
+
+```
+
+## Eclipses module request example
 Route : /propagation/eclipses', POST method
 ```json
 {
@@ -53,7 +68,7 @@ Route : /propagation/eclipses', POST method
 
 ```
 
-## Visibility Request example
+## Visibility module request example
 Route : /propagation/visibility', POST method
 ```json
 {
@@ -107,3 +122,7 @@ Route : /propagation/visibility', POST method
   ]
 }
 ```
+## Visibility:Ephemerids module request example
+Route : /propagation/satellites', POST method
+
+__To be completed: this functionnality, provided by ISAE/Supaero, needs to be investigated to understand its purpose.__

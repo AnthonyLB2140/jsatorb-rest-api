@@ -2,6 +2,8 @@
 import sys
 # Add mission analysis module 
 sys.path.append('../jsatorb-visibility-service')
+# Add eclipses module 
+sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
 sys.path.append('../jsatorb-date-conversion')
 
@@ -9,6 +11,8 @@ import bottle
 from bottle import request, response
 from MissionAnalysis import HAL_MissionAnalysis
 from DateConversion import HAL_DateConversion
+from EclipseCalculator import HAL_SatPos, EclipseCalculator
+from datetime import datetime
 import json
 
 app = application = bottle.default_app()
@@ -25,6 +29,7 @@ def enable_cors(fn):
             # actual request; reply with the actual response
             return fn(*args, **kwargs)
     return _enable_cors
+
 
 # --------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
@@ -48,6 +53,7 @@ def satelliteJSON():
 
     newMission.propagate()
     return json.dumps(newMission.getJSONEphemerids())
+
 
 # --------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
@@ -75,25 +81,73 @@ def satelliteOEM():
     newMission.propagate()
     return json.dumps(newMission.getVisibility())
 
+
 # --------------------------------------------------------------
 # MODULE        : jsatorb-eclipse-service
 # ROUTE         : /propagation/eclipses
 # FUNCTIONNALITY: Eclipse processing
 # --------------------------------------------------------------
-# @app.route('/propagation/eclipses', method=['OPTIONS', 'POST'])
-# @enable_cors
-# def EclipsesREST():
-#     response.content_type = 'application/json'
-#     data = request.json
-#     header = data['header']
-#     dateToConvert = header['timeStart']
-#     targetFormat = header['duration']
-#     sat = data['satellite']
+@app.route('/propagation/eclipses', method=['OPTIONS','POST'])
+@enable_cors
+def EclipseCalculatorREST():
+    response.content_type = 'application/json'
+    
+    data = request.json
+    print(json.dumps(data))
+    
+    stringDateFormat = '%Y-%m-%dT%H:%M:%S'
 
-#     newEclipses = HAL_Eclipses(timeStart, duration, sat)
+    try:
+        header = data['header']
+        sat = data['satellite']
 
-#     # Return json with processed Eclipses data
-#     return json.dumps(newEclipses.getEclipsesData())
+        stringDate = str( header['timeStart'] )
+        duration = float( header['duration'] )
+
+        typeSat = str( sat['type'] )
+        if 'keplerian' in typeSat:
+            sma = float( sat['sma'] )
+            if sma < 6371000:
+                return ValueError('bad sma value')
+            ecc = float( sat['ecc'] )
+            inc = float( sat['inc'] )
+            pa = float( sat['pa'] )
+            raan = float( sat['raan'] )
+            lv = float( sat['meanAnomaly'] )
+            calculator = EclipseCalculator(HAL_SatPos(sma, ecc, inc, pa, raan, lv, 'keplerian'),
+                datetime.strptime(stringDate, stringDateFormat), duration)
+            return eclipseToJSON( calculator.getEclipse() )
+
+        elif 'cartesian' in typeSat:
+            x = float( sat['x'] )
+            y = float( sat['y'] )
+            z = float( sat['z'] )
+            vx = float( sat['vx'] )
+            vy = float( sat['vy'] )
+            vz = float( sat['vz'] )
+            calculator = EclipseCalculator(HAL_SatPos(x, y, z, vx, vy, vz, 'cartesian'), 
+                datetime.strptime(stringDateFormat, stringDateFormat), duration)
+            return eclipseToJSON( calculator.getEclipse() )
+
+        else:
+            return error('bad type')
+
+    except Exception as e:
+        return error(type(e).__name__)
+
+def error(errorName):
+    return '{"error": "' + errorName + '"}'
+
+def eclipseToJSON(eclipse):
+    eclipseDictionary = []
+
+    for el in eclipse:
+        obj = {}
+        obj['start'] = el[0].toString()
+        obj['end'] = el[1].toString()
+        eclipseDictionary.append(obj)
+
+    return json.dumps(eclipseDictionary)
 
 
 # --------------------------------------------------------------

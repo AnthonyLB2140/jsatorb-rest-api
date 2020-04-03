@@ -30,6 +30,18 @@ def enable_cors(fn):
             return fn(*args, **kwargs)
     return _enable_cors
 
+# Method to output the HTTP Requests
+def showRequest(req):
+    print("RECEIVED REQUEST --------------------------------------------------")
+    print(req)
+    print("END OF RECEIVED REQUEST -------------------------------------------")
+
+# Method to output the HTTP Responses
+def showResponse(res):
+    print("SENT RESPONSE (truncated to 1000 char) ----------------------------")
+    print(res[0:1000])
+    print("END OF SENT RESPONSE ----------------------------------------------")
+
 
 # --------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
@@ -41,7 +53,8 @@ def enable_cors(fn):
 def satelliteJSON():
     response.content_type = 'application/json'
     data = request.json
-    print(json.dumps(data))
+    showRequest(json.dumps(data))
+
     header = data['header']
     satellites = data['satellites']
     newMission = HAL_MissionAnalysis(header['step'], header['duration'])
@@ -52,7 +65,10 @@ def satelliteJSON():
         newMission.addSatellite(sat)
 
     newMission.propagate()
-    return json.dumps(newMission.getJSONEphemerids())
+
+    res = json.dumps(newMission.getJSONEphemerids())
+    showResponse(res)
+    return res
 
 
 # --------------------------------------------------------------
@@ -65,6 +81,8 @@ def satelliteJSON():
 def satelliteOEM():
     response.content_type = 'application/json'
     data = request.json
+    showRequest(json.dumps(data))
+
     header = data['header']
     satellites = data['satellites']
     groundStations = data['groundStations']
@@ -79,7 +97,10 @@ def satelliteOEM():
         newMission.addGroundStation(gs)
 
     newMission.propagate()
-    return json.dumps(newMission.getVisibility())
+
+    res = json.dumps(newMission.getVisibility())
+    showResponse(res)
+    return res
 
 
 # --------------------------------------------------------------
@@ -93,7 +114,7 @@ def EclipseCalculatorREST():
     response.content_type = 'application/json'
     
     data = request.json
-    print(json.dumps(data))
+    showRequest(json.dumps(data))
     
     stringDateFormat = '%Y-%m-%dT%H:%M:%S'
 
@@ -108,15 +129,16 @@ def EclipseCalculatorREST():
         if 'keplerian' in typeSat:
             sma = float( sat['sma'] )
             if sma < 6371000:
-                return ValueError('bad sma value')
-            ecc = float( sat['ecc'] )
-            inc = float( sat['inc'] )
-            pa = float( sat['pa'] )
-            raan = float( sat['raan'] )
-            lv = float( sat['meanAnomaly'] )
-            calculator = EclipseCalculator(HAL_SatPos(sma, ecc, inc, pa, raan, lv, 'keplerian'),
-                datetime.strptime(stringDate, stringDateFormat), duration)
-            return eclipseToJSON( calculator.getEclipse() )
+                res = ValueError('bad sma value')
+            else:
+                ecc = float( sat['ecc'] )
+                inc = float( sat['inc'] )
+                pa = float( sat['pa'] )
+                raan = float( sat['raan'] )
+                lv = float( sat['meanAnomaly'] )
+                calculator = EclipseCalculator(HAL_SatPos(sma, ecc, inc, pa, raan, lv, 'keplerian'),
+                    datetime.strptime(stringDate, stringDateFormat), duration)
+                res = eclipseToJSON( calculator.getEclipse() )
 
         elif 'cartesian' in typeSat:
             x = float( sat['x'] )
@@ -127,13 +149,17 @@ def EclipseCalculatorREST():
             vz = float( sat['vz'] )
             calculator = EclipseCalculator(HAL_SatPos(x, y, z, vx, vy, vz, 'cartesian'), 
                 datetime.strptime(stringDateFormat, stringDateFormat), duration)
-            return eclipseToJSON( calculator.getEclipse() )
+            res = eclipseToJSON( calculator.getEclipse() )
 
         else:
-            return error('bad type')
+            res = error('bad type')
 
     except Exception as e:
-        return error(type(e).__name__)
+        res = error(type(e).__name__)
+
+    showResponse(res)
+    return res
+
 
 def error(errorName):
     return '{"error": "' + errorName + '"}'
@@ -160,6 +186,8 @@ def eclipseToJSON(eclipse):
 def DateConversionREST():
     response.content_type = 'application/json'
     data = request.json
+    showRequest(json.dumps(data))
+
     header = data['header']
     dateToConvert = header['dateToConvert']
     targetFormat = header['targetFormat']
@@ -167,7 +195,10 @@ def DateConversionREST():
     newDate = HAL_DateConversion(dateToConvert, targetFormat)
 
     # Return json with converted date in 'dateConverted'
-    return json.dumps(newDate.getDateTime())
+    res = json.dumps(newDate.getDateTime())
+    showResponse(res)
+    return res
+
 
 if __name__ == '__main__':
     bottle.run(host = '127.0.0.1', port = 8000)

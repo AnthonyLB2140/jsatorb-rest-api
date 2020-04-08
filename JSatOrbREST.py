@@ -5,7 +5,7 @@ sys.path.append('../jsatorb-visibility-service')
 # Add eclipses module 
 sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
-sys.path.append('../jsatorb-date-conversion')
+sys.path.append('../jsatorb-date-conversion/src')
 
 import bottle
 from bottle import request, response

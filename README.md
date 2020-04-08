@@ -11,7 +11,7 @@ conda activate JSatOrbEnv
 ```
 Launch the service:
 ```
-python JSatOrbREST.py
+python src/JSatOrbREST.py
 ```
 By default the service is going to run on the **port 8000**
 

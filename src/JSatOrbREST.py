@@ -148,14 +148,14 @@ def EclipseCalculatorREST():
             vy = float( sat['vy'] )
             vz = float( sat['vz'] )
             calculator = EclipseCalculator(HAL_SatPos(x, y, z, vx, vy, vz, 'cartesian'), 
-                datetime.strptime(stringDateFormat, stringDateFormat), duration)
+                datetime.strptime(stringDate, stringDateFormat), duration)
             res = eclipseToJSON( calculator.getEclipse() )
 
         else:
             res = error('bad type')
 
     except Exception as e:
-        res = error(type(e).__name__)
+        res = error(type(e).__name__ + str(e.args))
 
     showResponse(res)
     return res

@@ -228,7 +228,7 @@ def FileGenerationREST():
     duration = float( header['duration'] )
     stringDate = str( header['timeStart'] )
 
-    fileFolder = ''
+    fileFolder = 'files/'
     # One file minimum per satellite
     for sat in satellites:
         # OEM
@@ -263,9 +263,9 @@ def FileGenerationREST():
         for memType in options:
             if memType == 'VISIBILITY':
                 for gs in groundStations:
-                    memGenerator.addMemVisibility(sat['name'] + '_' + memType + '_' + gs['name'] + '.MEM', gs)
+                    memGenerator.addMemVisibility(fileFolder + sat['name'] + '_' + memType + '_' + gs['name'] + '.MEM', gs)
             else:
-                memGenerator.addMemType(memType, sat['name'] + '_' + memType + '.MEM')
+                memGenerator.addMemType(memType, fileFolder + sat['name'] + '_' + memType + '.MEM')
 
         memGenerator.propagate()
 

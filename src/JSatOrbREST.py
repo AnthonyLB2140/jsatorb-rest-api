@@ -6,12 +6,20 @@ sys.path.append('../jsatorb-visibility-service')
 sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
 sys.path.append('../jsatorb-date-conversion/src')
+# Add AEM and MEM generators modules
+sys.path.append('../jsatorb-common/AEM')
+sys.path.append('../jsatorb-common/MEM')
+# Add file conversion module
+sys.path.append('../jsatorb-common/file-conversion')
 
 import bottle
 from bottle import request, response
 from MissionAnalysis import HAL_MissionAnalysis
 from DateConversion import HAL_DateConversion
 from EclipseCalculator import HAL_SatPos, EclipseCalculator
+from AEMGenerator import AEMGenerator
+from MEMGenerator import MEMGenerator
+from ccsds2cic import ccsds2cic
 from datetime import datetime
 import json
 
@@ -199,6 +207,71 @@ def DateConversionREST():
     showResponse(res)
     return res
 
+# --------------------------------------------------------------
+# MODULE        : jsatorb-file-generation
+# ROUTE         : /propagation/eclipses
+# FUNCTIONNALITY: Eclipse processing
+# --------------------------------------------------------------
+@app.route('/vts', method=['OPTIONS','POST'])
+@enable_cors
+def FileGenerationREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    header = data['header']
+    satellites = data['satellites']
+    groundStations = data['groundStations']
+    options = data['options']
+
+    step = float( header['step'] )
+    duration = float( header['duration'] )
+    stringDate = str( header['timeStart'] )
+
+    fileFolder = ''
+    # One file minimum per satellite
+    for sat in satellites:
+        # OEM
+        nameFileOemCcsds = fileFolder + sat['name'] + '.OEM_ccsds'
+        nameFileOem = fileFolder + sat['name'] + '.OEM'
+
+        newMission = HAL_MissionAnalysis(step, duration)
+        newMission.setStartTime(stringDate)
+        newMission.addSatellite(sat)
+        newMission.propagate()
+        with open(nameFileOemCcsds,'w') as file:
+            file.write(newMission.getOEMEphemerids())
+        ccsds2cic(nameFileOemCcsds, nameFileOem)
+
+        # AEM
+        if 'ATTITUDE' in options:
+            nameFileAemCcsds = fileFolder + sat['name'] + '.AEM_ccsds'
+            nameFileAem = fileFolder + sat['name'] + '.AEM'
+
+            aemGenerator = AEMGenerator(stringDate, step, duration)
+            aemGenerator.setSatellite(sat)
+            aemGenerator.setFile(nameFileAemCcsds)
+            aemGenerator.setAttitudeLaw('')
+            aemGenerator.propagate()
+            ccsds2cic(nameFileAemCcsds, nameFileAem)
+
+            options.remove('ATTITUDE')
+
+        # MEM
+        memGenerator = MEMGenerator(stringDate, step, duration)
+        memGenerator.setSatellite(sat)
+        for memType in options:
+            if memType == 'VISIBILITY':
+                for gs in groundStations:
+                    memGenerator.addMemVisibility(sat['name'] + '_' + memType + '_' + gs['name'] + '.MEM', gs)
+            else:
+                memGenerator.addMemType(memType, sat['name'] + '_' + memType + '.MEM')
+
+        memGenerator.propagate()
+
+    res = json.dumps({"result": "success"})
+    showResponse(res)
+    return res
 
 if __name__ == '__main__':
     bottle.run(host = '127.0.0.1', port = 8000)

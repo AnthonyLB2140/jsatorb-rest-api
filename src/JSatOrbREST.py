@@ -1,7 +1,7 @@
 # Give visibility on processing modules called from the REST API
 import sys
 # Add mission analysis module 
-sys.path.append('../jsatorb-visibility-service')
+sys.path.append('../jsatorb-visibility-service/src')
 # Add eclipses module 
 sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 

@@ -6,11 +6,13 @@ sys.path.append('../jsatorb-visibility-service/src')
 sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
 sys.path.append('../jsatorb-date-conversion/src')
-# Add AEM and MEM generators modules
+# Add JSatOrb common module: AEM and MEM generators
 sys.path.append('../jsatorb-common/AEM')
 sys.path.append('../jsatorb-common/MEM')
-# Add file conversion module
+# Add JSatOrb common module: file conversion
 sys.path.append('../jsatorb-common/file-conversion')
+# Add JSatOrb common module: Mission Data management
+sys.path.append('../jsatorb-common/src/mission-mgmt')
 
 import bottle
 from bottle import request, response
@@ -20,6 +22,7 @@ from EclipseCalculator import HAL_SatPos, EclipseCalculator
 from AEMGenerator import AEMGenerator
 from MEMGenerator import MEMGenerator
 from ccsds2cic import ccsds2cic
+from MissionDataManager import writeMissionDataFile, loadMissionDataFile, listMissionDataFile
 from datetime import datetime
 import json
 
@@ -272,6 +275,70 @@ def FileGenerationREST():
     res = json.dumps({"result": "success"})
     showResponse(res)
     return res
+
+# --------------------------------------------------------------
+# MODULE        : jsatorb-common
+# ROUTE         : /data/store
+# FUNCTIONNALITY: Store mission data into a file
+# --------------------------------------------------------------
+@app.route('/data/store', method=['OPTIONS', 'POST'])
+@enable_cors
+def MissionDataStoreREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    header = data['header']
+    missionName = header['mission']
+
+    status = writeMissionDataFile(data, missionName)
+
+    # Return json containing the writing status
+    res = json.dumps(status)
+    showResponse(res)
+    return res
+
+# --------------------------------------------------------------
+# MODULE        : jsatorb-common
+# ROUTE         : /data/load
+# FUNCTIONNALITY: Load mission data previously stored
+# --------------------------------------------------------------
+@app.route('/data/load', method=['OPTIONS', 'POST'])
+@enable_cors
+def MissionDataLoadREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    header = data['header']
+    missionName = header['mission']
+
+    missionData = loadMissionDataFile(missionName)
+
+    # Return json containing the mission data
+    res = json.dumps(missionData)
+    showResponse(res)
+    return res
+
+# --------------------------------------------------------------
+# MODULE        : jsatorb-common
+# ROUTE         : /data/list
+# FUNCTIONNALITY: Get a list of mission data previously stored
+# --------------------------------------------------------------
+@app.route('/data/list', method=['OPTIONS', 'POST'])
+@enable_cors
+def MissionDataListREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    listMD = listMissionDataFile()
+
+    # Return json containing the list of available mission data sets
+    res = json.dumps(listMD)
+    showResponse(res)
+    return res
+
 
 if __name__ == '__main__':
     bottle.run(host = '127.0.0.1', port = 8000)

@@ -41,17 +41,32 @@ def enable_cors(fn):
             return fn(*args, **kwargs)
     return _enable_cors
 
-# Method to output the HTTP Requests
 def showRequest(req):
+    """Display received HTTP request on stdout."""
     print("RECEIVED REQUEST --------------------------------------------------")
     print(req)
     print("END OF RECEIVED REQUEST -------------------------------------------")
 
-# Method to output the HTTP Responses
 def showResponse(res):
+    """Display sent HTTP response on stdout."""
     print("SENT RESPONSE (truncated to 1000 char) ----------------------------")
     print(res[0:1000])
     print("END OF SENT RESPONSE ----------------------------------------------")
+
+def boolToRESTStatus(value):
+    """Convert a boolean to a REST status value {"SUCCESS, "FAIL"}."""
+    if (value == True):
+        return "SUCCESS"
+    else:
+        return "FAIL"
+
+def buildSMDResponse(status, message, data):
+    """
+    Build a formatted REST response as a dictionary: 
+    {"status": <operation status: "SUCCESS" or "FAIL">, "message": <error message if "FAIL" is returned>, "data": <response data>}
+    """
+
+    return {"status": status, "message": message, "data": data}
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
@@ -289,12 +304,10 @@ def MissionDataStoreREST(missionName):
     data = request.json
     showRequest(json.dumps(data))
 
-    header = data['header']
+    result = writeMissionDataFile(data, missionName)
 
-    status = writeMissionDataFile(data, missionName)
-
-    # Return json containing the operation status
-    res = json.dumps(status)
+    # Return a JSON formatted response containing the REST operation result: status, message and data.
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(result[0]), result[1], ""))
     showResponse(res)
     return res
 
@@ -311,12 +324,10 @@ def MissionDataLoadREST(missionName):
     data = request.json
     showRequest(json.dumps(data))
 
-    header = data['header']
+    result = loadMissionDataFile(missionName)
 
-    missionData = loadMissionDataFile(missionName)
-
-    # Return json containing the mission data
-    res = json.dumps(missionData)
+    # Return a JSON formatted response containing the REST operation result: status, message and data.
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(not result[0]==None), result[1], result[0]))
     showResponse(res)
     return res
 
@@ -333,10 +344,10 @@ def MissionDataListREST():
     data = request.json
     showRequest(json.dumps(data))
 
-    listMD = listMissionDataFile()
+    result = listMissionDataFile()
 
-    # Return json containing the list of available mission data sets
-    res = json.dumps(listMD)
+    # Return a JSON formatted response containing the REST operation result: status, message and data.
+    res = json.dumps(buildSMDResponse("SUCCESS", "List of available mission data sets", result))
     showResponse(res)
     return res
 
@@ -359,31 +370,28 @@ def MissionDataDuplicateREST():
 
     result = duplicateMissionDataFile(srcMissionName, destMissionName)
 
-    # Return json containing the operation status
-    res = json.dumps(result)
+    # Return a JSON formatted response containing the REST operation result: status, message and data.
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(result[0]), result[1], ""))
     showResponse(res)
     return res
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /missiondata/check
+# ROUTE         : /missiondata/check/<missionName>
 # METHOD        : GET
 # FUNCTIONNALITY: Check if a mission data file exists
 # -----------------------------------------------------------------------------
-@app.route('/missiondata/check', method=['OPTIONS', 'GET'])
+@app.route('/missiondata/check/<missionName>', method=['OPTIONS', 'GET'])
 @enable_cors
-def CheckMissionDataREST():
+def CheckMissionDataREST(missionName):
     response.content_type = 'application/json'
     data = request.json
     showRequest(json.dumps(data))
 
-    header = data['header']
-    missionName = header['mission']
-
     result = isMissionDataFileExists(missionName)
 
-    # Return json containing the operation status
-    res = json.dumps(result)
+    # Return a JSON formatted response containing the REST operation result: status, message and data.
+    res = json.dumps(buildSMDResponse("SUCCESS", "Check if a mission data set exists", result))
     showResponse(res)
     return res
 
@@ -400,12 +408,10 @@ def DeleteMissionDataREST(missionName):
     data = request.json
     showRequest(json.dumps(data))
 
-    header = data['header']
-
     result = deleteMissionDataFile(missionName)
 
-    # Return json containing the operation status
-    res = json.dumps(result)
+    # Return a JSON formatted response containing the REST operation result: status, message and data.
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(result[0]), result[1], ""))
     showResponse(res)
     return res
 

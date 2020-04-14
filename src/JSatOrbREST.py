@@ -1,5 +1,5 @@
-# Give visibility on processing modules called from the REST API
 import sys
+#### Give visibility on processing modules called from the REST API
 # Add mission analysis module 
 sys.path.append('../jsatorb-visibility-service/src')
 # Add eclipses module 
@@ -22,7 +22,7 @@ from EclipseCalculator import HAL_SatPos, EclipseCalculator
 from AEMGenerator import AEMGenerator
 from MEMGenerator import MEMGenerator
 from ccsds2cic import ccsds2cic
-from MissionDataManager import writeMissionDataFile, loadMissionDataFile, listMissionDataFile
+from MissionDataManager import writeMissionDataFile, loadMissionDataFile, listMissionDataFile, duplicateMissionDataFile, isMissionDataFileExists, deleteMissionDataFile
 from datetime import datetime
 import json
 
@@ -53,12 +53,11 @@ def showResponse(res):
     print(res[0:1000])
     print("END OF SENT RESPONSE ----------------------------------------------")
 
-
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
 # ROUTE         : /propagation/satellites
 # FUNCTIONNALITY: Ephemerids processing 
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/propagation/satellites', method=['OPTIONS','POST'])
 @enable_cors
 def satelliteJSON():
@@ -81,12 +80,11 @@ def satelliteJSON():
     showResponse(res)
     return res
 
-
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
 # ROUTE         : /propagation/visibility
 # FUNCTIONNALITY: Visibility processing
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/propagation/visibility', method=['OPTIONS', 'POST'])
 @enable_cors
 def satelliteOEM():
@@ -113,12 +111,11 @@ def satelliteOEM():
     showResponse(res)
     return res
 
-
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-eclipse-service
 # ROUTE         : /propagation/eclipses
 # FUNCTIONNALITY: Eclipse processing
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/propagation/eclipses', method=['OPTIONS','POST'])
 @enable_cors
 def EclipseCalculatorREST():
@@ -186,12 +183,11 @@ def eclipseToJSON(eclipse):
 
     return json.dumps(eclipseDictionary)
 
-
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-date-conversion
 # ROUTE         : /dateconversion
 # FUNCTIONNALITY: Date conversion from ISO-8601 to JD and MJD
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/dateconversion', method=['OPTIONS', 'POST'])
 @enable_cors
 def DateConversionREST():
@@ -210,11 +206,11 @@ def DateConversionREST():
     showResponse(res)
     return res
 
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-file-generation
 # ROUTE         : /propagation/eclipses
 # FUNCTIONNALITY: Eclipse processing
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/vts', method=['OPTIONS','POST'])
 @enable_cors
 def FileGenerationREST():
@@ -276,11 +272,11 @@ def FileGenerationREST():
     showResponse(res)
     return res
 
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
 # ROUTE         : /data/store
 # FUNCTIONNALITY: Store mission data into a file
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/data/store', method=['OPTIONS', 'POST'])
 @enable_cors
 def MissionDataStoreREST():
@@ -293,16 +289,16 @@ def MissionDataStoreREST():
 
     status = writeMissionDataFile(data, missionName)
 
-    # Return json containing the writing status
+    # Return json containing the operation status
     res = json.dumps(status)
     showResponse(res)
     return res
 
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
 # ROUTE         : /data/load
 # FUNCTIONNALITY: Load mission data previously stored
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/data/load', method=['OPTIONS', 'POST'])
 @enable_cors
 def MissionDataLoadREST():
@@ -320,11 +316,11 @@ def MissionDataLoadREST():
     showResponse(res)
     return res
 
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
 # ROUTE         : /data/list
 # FUNCTIONNALITY: Get a list of mission data previously stored
-# --------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @app.route('/data/list', method=['OPTIONS', 'POST'])
 @enable_cors
 def MissionDataListREST():
@@ -336,6 +332,73 @@ def MissionDataListREST():
 
     # Return json containing the list of available mission data sets
     res = json.dumps(listMD)
+    showResponse(res)
+    return res
+
+# -----------------------------------------------------------------------------
+# MODULE        : jsatorb-common
+# ROUTE         : /data/duplicate
+# FUNCTIONNALITY: Duplicate mission data to another mission file
+# -----------------------------------------------------------------------------
+@app.route('/data/duplicate', method=['OPTIONS', 'POST'])
+@enable_cors
+def MissionDataDuplicateREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    header = data['header']
+    srcMissionName = header['srcMission']
+    destMissionName = header['destMission']
+
+    result = duplicateMissionDataFile(srcMissionName, destMissionName)
+
+    # Return json containing the operation status
+    res = json.dumps(result)
+    showResponse(res)
+    return res
+
+# -----------------------------------------------------------------------------
+# MODULE        : jsatorb-common
+# ROUTE         : /data/check
+# FUNCTIONNALITY: Check if a mission data file exists
+# -----------------------------------------------------------------------------
+@app.route('/data/check', method=['OPTIONS', 'POST'])
+@enable_cors
+def CheckMissionDataREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    header = data['header']
+    missionName = header['mission']
+
+    result = isMissionDataFileExists(missionName)
+
+    # Return json containing the operation status
+    res = json.dumps(result)
+    showResponse(res)
+    return res
+
+# -----------------------------------------------------------------------------
+# MODULE        : jsatorb-common
+# ROUTE         : /data/delete
+# FUNCTIONNALITY: Delete a mission data file
+# -----------------------------------------------------------------------------
+@app.route('/data/delete', method=['OPTIONS', 'POST'])
+@enable_cors
+def DeleteMissionDataREST():
+    response.content_type = 'application/json'
+    data = request.json
+    showRequest(json.dumps(data))
+
+    header = data['header']
+    missionName = header['mission']
+
+    result = deleteMissionDataFile(missionName)
+
+    # Return json containing the operation status
+    res = json.dumps(result)
     showResponse(res)
     return res
 

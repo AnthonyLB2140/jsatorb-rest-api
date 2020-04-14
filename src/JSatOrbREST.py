@@ -33,7 +33,7 @@ def enable_cors(fn):
     def _enable_cors(*args, **kwargs):
         # set CORS headers
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS, DELETE'
         response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
 
         if bottle.request.method != 'OPTIONS':
@@ -56,6 +56,7 @@ def showResponse(res):
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
 # ROUTE         : /propagation/satellites
+# METHOD        : POST
 # FUNCTIONNALITY: Ephemerids processing 
 # -----------------------------------------------------------------------------
 @app.route('/propagation/satellites', method=['OPTIONS','POST'])
@@ -83,6 +84,7 @@ def satelliteJSON():
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-visibility-service
 # ROUTE         : /propagation/visibility
+# METHOD        : POST
 # FUNCTIONNALITY: Visibility processing
 # -----------------------------------------------------------------------------
 @app.route('/propagation/visibility', method=['OPTIONS', 'POST'])
@@ -114,6 +116,7 @@ def satelliteOEM():
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-eclipse-service
 # ROUTE         : /propagation/eclipses
+# METHOD        : POST
 # FUNCTIONNALITY: Eclipse processing
 # -----------------------------------------------------------------------------
 @app.route('/propagation/eclipses', method=['OPTIONS','POST'])
@@ -209,6 +212,7 @@ def DateConversionREST():
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-file-generation
 # ROUTE         : /propagation/eclipses
+# METHOD        : POST
 # FUNCTIONNALITY: Eclipse processing
 # -----------------------------------------------------------------------------
 @app.route('/vts', method=['OPTIONS','POST'])
@@ -274,18 +278,18 @@ def FileGenerationREST():
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /data/store
+# ROUTE         : /missiondata/<missionName>
+# METHOD        : POST
 # FUNCTIONNALITY: Store mission data into a file
 # -----------------------------------------------------------------------------
-@app.route('/data/store', method=['OPTIONS', 'POST'])
+@app.route('/missiondata/<missionName>', method=['OPTIONS', 'POST'])
 @enable_cors
-def MissionDataStoreREST():
+def MissionDataStoreREST(missionName):
     response.content_type = 'application/json'
     data = request.json
     showRequest(json.dumps(data))
 
     header = data['header']
-    missionName = header['mission']
 
     status = writeMissionDataFile(data, missionName)
 
@@ -296,18 +300,18 @@ def MissionDataStoreREST():
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /data/load
+# ROUTE         : /missiondata/<missionName>
+# METHOD        : GET
 # FUNCTIONNALITY: Load mission data previously stored
 # -----------------------------------------------------------------------------
-@app.route('/data/load', method=['OPTIONS', 'POST'])
+@app.route('/missiondata/<missionName>', method=['OPTIONS', 'GET'])
 @enable_cors
-def MissionDataLoadREST():
+def MissionDataLoadREST(missionName):
     response.content_type = 'application/json'
     data = request.json
     showRequest(json.dumps(data))
 
     header = data['header']
-    missionName = header['mission']
 
     missionData = loadMissionDataFile(missionName)
 
@@ -318,10 +322,11 @@ def MissionDataLoadREST():
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /data/list
+# ROUTE         : /missiondata/list
+# METHOD        : GET
 # FUNCTIONNALITY: Get a list of mission data previously stored
 # -----------------------------------------------------------------------------
-@app.route('/data/list', method=['OPTIONS', 'POST'])
+@app.route('/missiondata/list', method=['OPTIONS', 'GET'])
 @enable_cors
 def MissionDataListREST():
     response.content_type = 'application/json'
@@ -337,10 +342,11 @@ def MissionDataListREST():
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /data/duplicate
+# ROUTE         : /missiondata/duplicate
+# METHOD        : POST
 # FUNCTIONNALITY: Duplicate mission data to another mission file
 # -----------------------------------------------------------------------------
-@app.route('/data/duplicate', method=['OPTIONS', 'POST'])
+@app.route('/missiondata/duplicate', method=['OPTIONS', 'POST'])
 @enable_cors
 def MissionDataDuplicateREST():
     response.content_type = 'application/json'
@@ -360,10 +366,11 @@ def MissionDataDuplicateREST():
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /data/check
+# ROUTE         : /missiondata/check
+# METHOD        : GET
 # FUNCTIONNALITY: Check if a mission data file exists
 # -----------------------------------------------------------------------------
-@app.route('/data/check', method=['OPTIONS', 'POST'])
+@app.route('/missiondata/check', method=['OPTIONS', 'GET'])
 @enable_cors
 def CheckMissionDataREST():
     response.content_type = 'application/json'
@@ -382,18 +389,18 @@ def CheckMissionDataREST():
 
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-common
-# ROUTE         : /data/delete
+# ROUTE         : /missiondata/<missionName>
+# METHOD        : DELETE
 # FUNCTIONNALITY: Delete a mission data file
 # -----------------------------------------------------------------------------
-@app.route('/data/delete', method=['OPTIONS', 'POST'])
+@app.route('/missiondata/<missionName>', method=['OPTIONS', 'DELETE'])
 @enable_cors
-def DeleteMissionDataREST():
+def DeleteMissionDataREST(missionName):
     response.content_type = 'application/json'
     data = request.json
     showRequest(json.dumps(data))
 
     header = data['header']
-    missionName = header['mission']
 
     result = deleteMissionDataFile(missionName)
 

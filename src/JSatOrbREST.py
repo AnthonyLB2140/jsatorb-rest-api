@@ -7,10 +7,10 @@ sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
 sys.path.append('../jsatorb-date-conversion/src')
 # Add AEM and MEM generators modules
-sys.path.append('../jsatorb-common/AEM')
-sys.path.append('../jsatorb-common/MEM')
+sys.path.append('../jsatorb-common/src/AEM')
+sys.path.append('../jsatorb-common/src/MEM')
 # Add file conversion module
-sys.path.append('../jsatorb-common/file-conversion')
+sys.path.append('../jsatorb-common/src/file-conversion')
 
 import bottle
 from bottle import request, response

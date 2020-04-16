@@ -217,10 +217,18 @@ def DateConversionREST():
     dateToConvert = header['dateToConvert']
     targetFormat = header['targetFormat']
 
-    newDate = HAL_DateConversion(dateToConvert, targetFormat)
+    try:
+        newDate = HAL_DateConversion(dateToConvert, targetFormat)
 
-    # Return json with converted date in 'dateConverted'
-    res = json.dumps(newDate.getDateTime())
+        # Return json with converted date in 'dateConverted'
+
+        result = newDate.getDateTime()
+        errorMessage = ''
+    except Exception as e:
+        result = None
+        errorMessage = error(type(e).__name__)
+
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
     showResponse(res)
     return res
 

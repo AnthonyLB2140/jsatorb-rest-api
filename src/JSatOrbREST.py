@@ -273,12 +273,10 @@ def FileGenerationREST():
 
         result = "Files generated"
         errorMessage = ''
-    except NameError:
-        pass
-    '''except Exception as e:
+    except Exception as e:
         result = None
         errorMessage = str(e)
-    '''
+    
     res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
     showResponse(res)
 

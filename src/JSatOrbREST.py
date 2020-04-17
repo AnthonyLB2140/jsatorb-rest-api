@@ -7,10 +7,11 @@ sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
 sys.path.append('../jsatorb-date-conversion/src')
 # Add JSatOrb common module: AEM and MEM generators
-sys.path.append('../jsatorb-common/AEM')
-sys.path.append('../jsatorb-common/MEM')
+sys.path.append('../jsatorb-common/src')
+sys.path.append('../jsatorb-common/src/AEM')
+sys.path.append('../jsatorb-common/src/MEM')
 # Add JSatOrb common module: file conversion
-sys.path.append('../jsatorb-common/file-conversion')
+sys.path.append('../jsatorb-common/src/file-conversion')
 # Add JSatOrb common module: Mission Data management
 sys.path.append('../jsatorb-common/src/mission-mgmt')
 
@@ -250,6 +251,10 @@ def FileGenerationREST():
     groundStations = data['groundStations']
     options = data['options']
 
+    if 'celestialBody' in header:
+        bodyString = header['celestialBody']
+    else:
+        bodyString = 'EARTH'
     step = float( header['step'] )
     duration = float( header['duration'] )
     stringDate = str( header['timeStart'] )
@@ -261,7 +266,7 @@ def FileGenerationREST():
         nameFileOemCcsds = fileFolder + sat['name'] + '.OEM_ccsds'
         nameFileOem = fileFolder + sat['name'] + '.OEM'
 
-        newMission = HAL_MissionAnalysis(step, duration)
+        newMission = HAL_MissionAnalysis(step, duration,bodyString)
         newMission.setStartTime(stringDate)
         newMission.addSatellite(sat)
         newMission.propagate()
@@ -274,7 +279,7 @@ def FileGenerationREST():
             nameFileAemCcsds = fileFolder + sat['name'] + '.AEM_ccsds'
             nameFileAem = fileFolder + sat['name'] + '.AEM'
 
-            aemGenerator = AEMGenerator(stringDate, step, duration)
+            aemGenerator = AEMGenerator(stringDate, step, duration, bodyString)
             aemGenerator.setSatellite(sat)
             aemGenerator.setFile(nameFileAemCcsds)
             aemGenerator.setAttitudeLaw('')
@@ -284,7 +289,7 @@ def FileGenerationREST():
             options.remove('ATTITUDE')
 
         # MEM
-        memGenerator = MEMGenerator(stringDate, step, duration)
+        memGenerator = MEMGenerator(stringDate, step, duration, bodyString)
         memGenerator.setSatellite(sat)
         for memType in options:
             if memType == 'VISIBILITY':

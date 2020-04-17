@@ -10,6 +10,7 @@ sys.path.append('../jsatorb-date-conversion/src')
 sys.path.append('../jsatorb-common/src')
 sys.path.append('../jsatorb-common/src/AEM')
 sys.path.append('../jsatorb-common/src/MEM')
+sys.path.append('../jsatorb-common/src/VTS')
 # Add JSatOrb common module: file conversion
 sys.path.append('../jsatorb-common/src/file-conversion')
 # Add JSatOrb common module: Mission Data management
@@ -20,8 +21,8 @@ from bottle import request, response
 from MissionAnalysis import HAL_MissionAnalysis
 from DateConversion import HAL_DateConversion
 from EclipseCalculator import HAL_SatPos, EclipseCalculator
-from AEMGenerator import AEMGenerator
-from MEMGenerator import MEMGenerator
+from FileGenerator import FileGenerator
+from VTSGenerator import VTSGenerator
 from ccsds2cic import ccsds2cic
 from MissionDataManager import writeMissionDataFile, loadMissionDataFile, listMissionDataFile, duplicateMissionDataFile, isMissionDataFileExists, deleteMissionDataFile
 from datetime import datetime
@@ -211,14 +212,15 @@ def eclipseToJSON(eclipse):
 @enable_cors
 def DateConversionREST():
     response.content_type = 'application/json'
+
     data = request.json
     showRequest(json.dumps(data))
 
-    header = data['header']
-    dateToConvert = header['dateToConvert']
-    targetFormat = header['targetFormat']
-
     try:
+        header = data['header']
+        dateToConvert = header['dateToConvert']
+        targetFormat = header['targetFormat']
+
         newDate = HAL_DateConversion(dateToConvert, targetFormat)
 
         # Return json with converted date in 'dateConverted'
@@ -227,7 +229,7 @@ def DateConversionREST():
         errorMessage = ''
     except Exception as e:
         result = None
-        errorMessage = error(type(e).__name__)
+        errorMessage = str(e)
 
     res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
     showResponse(res)
@@ -246,62 +248,40 @@ def FileGenerationREST():
     data = request.json
     showRequest(json.dumps(data))
 
-    header = data['header']
-    satellites = data['satellites']
-    groundStations = data['groundStations']
-    options = data['options']
+    try:
+        header = data['header']
+        satellites = data['satellites']
+        groundStations = data['groundStations']
+        options = data['options']
 
-    if 'celestialBody' in header:
-        bodyString = header['celestialBody']
-    else:
-        bodyString = 'EARTH'
-    step = float( header['step'] )
-    duration = float( header['duration'] )
-    stringDate = str( header['timeStart'] )
+        if 'celestialBody' not in header:
+            header['celestialBody'] = 'EARTH'
+        
+        bodyString = str( header['celestialBody'] )
+        step = float( header['step'] )
+        duration = float( header['duration'] )
+        stringDate = str( header['timeStart'] )
 
-    fileFolder = 'files/'
-    # One file minimum per satellite
-    for sat in satellites:
-        # OEM
-        nameFileOemCcsds = fileFolder + sat['name'] + '.OEM_ccsds'
-        nameFileOem = fileFolder + sat['name'] + '.OEM'
+        fileFolder = 'files/'
 
-        newMission = HAL_MissionAnalysis(step, duration,bodyString)
-        newMission.setStartTime(stringDate)
-        newMission.addSatellite(sat)
-        newMission.propagate()
-        with open(nameFileOemCcsds,'w') as file:
-            file.write(newMission.getOEMEphemerids())
-        ccsds2cic(nameFileOemCcsds, nameFileOem)
+        fileGenerator = FileGenerator(stringDate, duration, step, bodyString, satellites, groundStations, options)
+        fileGenerator.generate(fileFolder)
 
-        # AEM
-        if 'ATTITUDE' in options:
-            nameFileAemCcsds = fileFolder + sat['name'] + '.AEM_ccsds'
-            nameFileAem = fileFolder + sat['name'] + '.AEM'
+        vtsGenerator = VTSGenerator('files/project.vts', 'mainModel.vts', '../jsatorb-common/src/VTS/')
+        header['options'] = options
+        vtsGenerator.generate(header, satellites, groundStations)
 
-            aemGenerator = AEMGenerator(stringDate, step, duration, bodyString)
-            aemGenerator.setSatellite(sat)
-            aemGenerator.setFile(nameFileAemCcsds)
-            aemGenerator.setAttitudeLaw('')
-            aemGenerator.propagate()
-            ccsds2cic(nameFileAemCcsds, nameFileAem)
-
-            options.remove('ATTITUDE')
-
-        # MEM
-        memGenerator = MEMGenerator(stringDate, step, duration, bodyString)
-        memGenerator.setSatellite(sat)
-        for memType in options:
-            if memType == 'VISIBILITY':
-                for gs in groundStations:
-                    memGenerator.addMemVisibility(fileFolder + sat['name'] + '_' + memType + '_' + gs['name'] + '.MEM', gs)
-            else:
-                memGenerator.addMemType(memType, fileFolder + sat['name'] + '_' + memType + '.MEM')
-
-        memGenerator.propagate()
-
-    res = json.dumps({"result": "success"})
+        result = "Files generated"
+        errorMessage = ''
+    except NameError:
+        pass
+    '''except Exception as e:
+        result = None
+        errorMessage = str(e)
+    '''
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
     showResponse(res)
+
     return res
 
 # -----------------------------------------------------------------------------

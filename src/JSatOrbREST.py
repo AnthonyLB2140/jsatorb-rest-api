@@ -1,3 +1,5 @@
+from distutils.dir_util import copy_tree
+import os
 import sys
 #### Give visibility on processing modules called from the REST API
 # Add mission analysis module 
@@ -262,12 +264,22 @@ def FileGenerationREST():
         duration = float( header['duration'] )
         stringDate = str( header['timeStart'] )
 
-        fileFolder = 'files/'
+        if 'project' not in header:
+            header['project'] = 'default_' + satellites[0]['name']
+        projectFolder = 'files/' + header['project'] + '/'
+        dataFolder = projectFolder + 'Data/'
+        if not os.path.isdir(projectFolder):
+            os.mkdir(projectFolder)
+            os.mkdir(dataFolder)
+        elif not os.path.isdir(dataFolder):
+            os.mkdir(dataFolder)
+        copy_tree('files/Models', projectFolder+'Models')
 
         fileGenerator = FileGenerator(stringDate, duration, step, bodyString, satellites, groundStations, options)
-        fileGenerator.generate(fileFolder)
+        fileGenerator.generate(dataFolder)
 
-        vtsGenerator = VTSGenerator('files/project.vts', 'mainModel.vts', '../jsatorb-common/src/VTS/')
+        nameVtsFile = projectFolder + '/' + header['project'] + '.vts'
+        vtsGenerator = VTSGenerator(nameVtsFile, 'mainModel.vts', '../jsatorb-common/src/VTS/')
         header['options'] = options
         vtsGenerator.generate(header, satellites, groundStations)
 

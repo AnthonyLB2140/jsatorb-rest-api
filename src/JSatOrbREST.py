@@ -87,7 +87,17 @@ def satelliteJSON():
 
     header = data['header']
     satellites = data['satellites']
-    newMission = HAL_MissionAnalysis(header['step'], header['duration'])
+    step = header['step']
+    duration = header['duration']
+
+    # Assign default value ('EARTH') if celestial body is undefined.
+    if 'celestialBody' in header:
+        celestialBody=header['celestialBody']
+    else:
+        celestialBody = 'EARTH'
+        
+    newMission = HAL_MissionAnalysis(step, duration, celestialBody)    
+
     if 'timeStart' in header:
         newMission.setStartTime(header['timeStart'])
 
@@ -116,7 +126,16 @@ def satelliteOEM():
     header = data['header']
     satellites = data['satellites']
     groundStations = data['groundStations']
-    newMission = HAL_MissionAnalysis(header['step'], header['duration'])
+    step = header['step']
+    duration = header['duration']
+
+    # Assign default value ('EARTH') if celestial body is undefined.
+    if 'celestialBody' in header:
+        celestialBody=header['celestialBody']
+    else:
+        celestialBody = 'EARTH'
+        
+    newMission = HAL_MissionAnalysis(step, duration, celestialBody)    
     if 'timeStart' in header:
         newMission.setStartTime(header['timeStart'])
 

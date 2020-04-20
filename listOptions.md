@@ -2,6 +2,9 @@
 This is the list of potential options for the generation of data files.
 These files are further used for visualization in VTS.
 
+## 'CARTESIAN'
+Cartesian coordinates of a satellite (always selected in JSatOrb GUI)
+
 ## 'ATTITUDE'
 Attitude of the satellite
 

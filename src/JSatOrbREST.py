@@ -8,7 +8,6 @@ sys.path.append('../jsatorb-visibility-service/src')
 sys.path.append('../jsatorb-eclipse-service/src')
 # Add Date conversion module 
 sys.path.append('../jsatorb-date-conversion/src')
-<<<<<<< HEAD
 # Add JSatOrb common module: AEM and MEM generators
 sys.path.append('../jsatorb-common/src')
 sys.path.append('../jsatorb-common/src/AEM')

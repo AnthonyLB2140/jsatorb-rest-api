@@ -1,13 +1,20 @@
 # JSatOrb REST API
 
 ## Prerequisites
+
+A Conda virtual Python environment (named JSatOrbEnv) in which should be installed the following packages:
 - Python3
-- Orekit, hyparchus and bottle must be installed
+- Orekit (including hipparchus) 
+- and bottle.
 
 ## Launch the service
 Activate the JSatOrb virtual environment:
 ```
 conda activate JSatOrbEnv
+```
+Go into the REST API folder
+```
+cd jsatorb-rest-api
 ```
 Launch the service:
 ```

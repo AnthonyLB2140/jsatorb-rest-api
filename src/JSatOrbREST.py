@@ -277,15 +277,15 @@ def FileGenerationREST():
 
         if 'celestialBody' not in header:
             header['celestialBody'] = 'EARTH'
+        celestialBody = str( header['celestialBody'] )
         
-        bodyString = str( header['celestialBody'] )
         step = float( header['step'] )
         duration = float( header['duration'] )
         stringDate = str( header['timeStart'] )
 
-        if 'project' not in header:
-            header['project'] = 'default_' + satellites[0]['name']
-        projectFolder = 'files/' + header['project'] + '/'
+        if 'mission' not in header:
+            header['mission'] = 'default_' + satellites[0]['name']
+        projectFolder = 'files/' + header['mission'] + '/'
         dataFolder = projectFolder + 'Data/'
         if not os.path.isdir(projectFolder):
             os.mkdir(projectFolder)
@@ -294,16 +294,16 @@ def FileGenerationREST():
             os.mkdir(dataFolder)
         copy_tree('files/Models', projectFolder+'Models')
 
-        fileGenerator = FileGenerator(stringDate, duration, step, bodyString, satellites, groundStations, options)
+        fileGenerator = FileGenerator(stringDate, duration, step, celestialBody, satellites, groundStations, options)
         fileGenerator.generate(dataFolder)
 
-        nameVtsFile = projectFolder + '/' + header['project'] + '.vts'
+        nameVtsFile = projectFolder + '/' + header['mission'] + '.vts'
         vtsGenerator = VTSGenerator(nameVtsFile, 'mainModel.vts', '../jsatorb-common/src/VTS/')
         header['options'] = options
         vtsGenerator.generate(header, satellites, groundStations)
 
-        result = "Files generated"
-        errorMessage = ''
+        result = ""
+        errorMessage = 'Files generated'
     except Exception as e:
         result = None
         errorMessage = str(e)

@@ -1,6 +1,13 @@
 # List of arguments for a constellation
 This is the list of arguments that can be taken for the generation of a constellation.
 
+## 'name'
+Name of the whole constellation. Names of the satellites will be name1, name2, ...
+
+## 'color'
+Optional, depends if we want a unique color for the whole constellation or not.
+If no color, each satellite has its own color.
+
 ## 'sma'
 Semi-major axis (which is also the radius since we consider no eccentricity (in m).
 

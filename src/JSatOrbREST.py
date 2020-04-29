@@ -1,6 +1,10 @@
 from distutils.dir_util import copy_tree
 import os
 import sys
+import io
+import zipfile
+from bottle import HTTPResponse
+
 #### Give visibility on processing modules called from the REST API
 # Add mission analysis module 
 sys.path.append('../jsatorb-visibility-service/src')
@@ -256,16 +260,78 @@ def DateConversionREST():
     showResponse(res)
     return res
 
+# -----------------------------------------------------------------------------------------
+# VTS ZIP FILE BLOB RESPONSE PROTOTYPE FUNCTIONS
+# -----------------------------------------------------------------------------------------
+# NEW METHOD
+#For the given path, get the List of all files in the directory tree 
+def getListOfFiles(dirName):
+    # create a list of file and sub directories 
+    # names in the given directory 
+    listOfFile = os.listdir(dirName)
+    allFiles = list()
+    # Iterate over all the entries
+    for entry in listOfFile:
+        # Create full path
+        fullPath = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory 
+        if os.path.isdir(fullPath):
+            allFiles = allFiles + getListOfFiles(fullPath)
+        else:
+            allFiles.append(fullPath)
+                
+    return allFiles
+
+# NEW METHOD
+def zipped_vts_response(vts_folder, mission):
+    buf = io.BytesIO()
+    # Get the list of all files in directory tree at given path
+    listOfFiles = getListOfFiles(vts_folder)
+
+    with zipfile.ZipFile(buf, 'w') as zipfh:
+        for individualFile in listOfFiles:
+            dt = datetime.now()
+            timeinfo = (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+            info = zipfile.ZipInfo(individualFile, timeinfo)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            with open(individualFile, 'rb') as content_file:
+                content = content_file.read()
+                zipfh.writestr(info, content)
+    buf.seek(0)
+
+    filename = 'vts-' + mission + '-content.vz'
+
+    r = HTTPResponse(status=200, body=buf)
+    r.set_header('Content-Type', 'application/vnd+cssi.vtsproject+zip')
+    r.set_header('Content-Disposition', "attachment; filename='" + filename + "'")
+    r.set_header('Access-Control-Allow-Origin', '*')
+    print(r)
+    return r
+
+# NEW METHOD
+'''
+@app.route('/propagation/satellites', method=['OPTIONS','POST', 'GET'])
+@enable_cors
+def satelliteJSON():
+  print('Returning VTS ZIP File as Response')
+  return zipped_vts_response('/home/olivier/JSatOrb/test/vtscontent')
+'''
+
+# -----------------------------------------------------------------------------------------
+# END OF VTS ZIP FILE BLOB RESPONSE PROTOTYPE FUNCTIONS
+# -----------------------------------------------------------------------------------------
+
+
 # -----------------------------------------------------------------------------
 # MODULE        : jsatorb-file-generation
 # ROUTE         : /propagation/eclipses
 # METHOD        : POST
 # FUNCTIONNALITY: Eclipse processing
 # -----------------------------------------------------------------------------
-@app.route('/vts', method=['OPTIONS','POST'])
+@app.route('/vts', method=['OPTIONS', 'POST'])
 @enable_cors
 def FileGenerationREST():
-    response.content_type = 'application/json'
+    #response.content_type = 'application/json'
     data = request.json
     showRequest(json.dumps(data))
 
@@ -301,12 +367,19 @@ def FileGenerationREST():
 
         result = ""
         errorMessage = 'Files generated'
+
+        # Success response
+        res = zipped_vts_response(projectFolder, header['mission'])
+        print('Returning compressed VTS data structure as Response')
+
     except Exception as e:
         result = None
         errorMessage = str(e)
-    
-    res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
-    showResponse(res)
+
+        # Error response
+        print('An error occured while producing the compressed VTS data structure !')
+        res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
+        showResponse(res)
 
     return res
 

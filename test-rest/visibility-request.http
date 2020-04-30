@@ -1,0 +1,49 @@
+# -----------------------------------------------------------------------------
+# JSatOrb Module REST requests: visibility
+# -----------------------------------------------------------------------------
+# These requests are sent from Visual studio code, using the REST client for
+# Visual Studio Code extension 
+# (https://marketplace.visualstudio.com/items?itemName=humao.rest-client).
+# -----------------------------------------------------------------------------
+# How to use: 
+#  - in Visual studio code, install the REST client extension,
+#  - open this file,
+#  - launch the JSatOrb REST API server,
+#  - click on the "Send request" link above each request,
+#  - the REST API response should be displayed in a separated Response window.
+# -----------------------------------------------------------------------------
+# To separate two distinct requests, add a line with '###' between them.
+# -----------------------------------------------------------------------------
+
+
+## Send a request to get the satellite ephemeris and get the satellite/ground 
+## station visibility segments (the JSON response content is Cesium formatted).
+POST http://localhost:8000/propagation/visibility HTTP/1.1
+content-type: application/json
+
+{
+  "header": {
+    "timeStart": "2011-12-01T16:43:45",
+    "duration": "86400",
+    "step": "60"
+  },
+  "satellites": [
+    {"name": "Sat",
+    "type": "keplerian",
+    "sma": 6801682.16,
+    "ecc": 0.0012566,
+    "inc": 52.03041,
+    "pa": 128.74852,
+    "raan": 72.67830,
+    "meanAnomaly": 67.79703
+    }
+  ],
+  "groundStations": [
+      {"name": "TLS",
+      "latitude": "43.5",
+      "longitude": "1.5",
+      "altitude": "100",
+      "elevation": "5.0"
+      }
+  ]
+}

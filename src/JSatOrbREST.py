@@ -3,6 +3,7 @@ import os
 import sys
 import io
 import zipfile
+import pathlib
 from bottle import HTTPResponse
 
 #### Give visibility on processing modules called from the REST API
@@ -261,11 +262,18 @@ def DateConversionREST():
     return res
 
 # -----------------------------------------------------------------------------------------
-# VTS ZIP FILE BLOB RESPONSE PROTOTYPE FUNCTIONS
+# VTS ZIP FILE BLOB RESPONSE HELPER FUNCTIONS
 # -----------------------------------------------------------------------------------------
-# NEW METHOD
-#For the given path, get the List of all files in the directory tree 
+
 def getListOfFiles(dirName):
+    """
+    For the given path, get the List of all files in the directory tree (recursively)
+
+    Parameters:
+        dirName The folder to list the files of.
+    Returns
+        The list of files beginning with the same path given by dirName.
+    """
     # create a list of file and sub directories 
     # names in the given directory 
     listOfFile = os.listdir(dirName)
@@ -282,17 +290,29 @@ def getListOfFiles(dirName):
                 
     return allFiles
 
-# NEW METHOD
 def zipped_vts_response(vts_folder, mission):
+    """
+    Create an HTTP response containing the VTS compressed data structure in its body
+
+    Parameters:
+        vts_folder The folder which content has to be compressed and encapsulated into an http response.
+        mission The mission name used to give a name to the zip attachment content.
+    Returns:
+        The HTTP Response containg the VTS compressed content, or None if zipRoot is not child of vts_folder
+    """
+
     buf = io.BytesIO()
     # Get the list of all files in directory tree at given path
     listOfFiles = getListOfFiles(vts_folder)
 
     with zipfile.ZipFile(buf, 'w') as zipfh:
         for individualFile in listOfFiles:
+            fileSegments = individualFile.split('/')
+            fileSegmentsTruncated = fileSegments[1:]
+            fileFinalFilename = '/'.join(fileSegmentsTruncated)
             dt = datetime.now()
             timeinfo = (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
-            info = zipfile.ZipInfo(individualFile, timeinfo)
+            info = zipfile.ZipInfo(fileFinalFilename, timeinfo)
             info.compress_type = zipfile.ZIP_DEFLATED
             with open(individualFile, 'rb') as content_file:
                 content = content_file.read()
@@ -308,17 +328,8 @@ def zipped_vts_response(vts_folder, mission):
     print(r)
     return r
 
-# NEW METHOD
-'''
-@app.route('/propagation/satellites', method=['OPTIONS','POST', 'GET'])
-@enable_cors
-def satelliteJSON():
-  print('Returning VTS ZIP File as Response')
-  return zipped_vts_response('/home/olivier/JSatOrb/test/vtscontent')
-'''
-
 # -----------------------------------------------------------------------------------------
-# END OF VTS ZIP FILE BLOB RESPONSE PROTOTYPE FUNCTIONS
+# END OF VTS ZIP FILE BLOB RESPONSE HELPER FUNCTIONS
 # -----------------------------------------------------------------------------------------
 
 
@@ -370,7 +381,14 @@ def FileGenerationREST():
 
         # Success response
         res = zipped_vts_response(projectFolder, header['mission'])
-        print('Returning compressed VTS data structure as Response')
+        if (not res == None):
+            print('Returning compressed VTS data structure as Response')
+        else:
+            result = "FAIL"
+            message = "REST API internal error while creating the VTS archive !"
+
+            res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))            
+            showResponse(res)
 
     except Exception as e:
         result = None

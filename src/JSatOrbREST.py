@@ -50,18 +50,21 @@ def enable_cors(fn):
             return fn(*args, **kwargs)
     return _enable_cors
 
+# Display received HTTP request on stdout.
 def showRequest(req):
     """Display received HTTP request on stdout."""
     print("RECEIVED REQUEST --------------------------------------------------")
     print(req)
     print("END OF RECEIVED REQUEST -------------------------------------------")
 
+# Display sent HTTP response on stdout.
 def showResponse(res):
     """Display sent HTTP response on stdout."""
     print("SENT RESPONSE (truncated to 1000 char) ----------------------------")
     print(res[0:1000])
     print("END OF SENT RESPONSE ----------------------------------------------")
 
+# Convert a boolean to a REST status value {"SUCCESS, "FAIL"}.
 def boolToRESTStatus(value):
     """Convert a boolean to a REST status value {"SUCCESS, "FAIL"}."""
     if (value == True):
@@ -69,6 +72,7 @@ def boolToRESTStatus(value):
     else:
         return "FAIL"
 
+# Build a formatted REST response (SMD= Status, Message, Data) as a dictionary.
 def buildSMDResponse(status, message, data):
     """
     Build a formatted REST response as a dictionary: 
@@ -322,8 +326,13 @@ def zipped_vts_response(vts_folder, mission):
     filename = 'vts-' + mission + '-content.vz'
 
     r = HTTPResponse(status=200, body=buf)
-    r.set_header('Content-Type', 'application/vnd+cssi.vtsproject+zip')
+    # Set theJSatOrb custom content type (to force the JSatorb GUI Web browser to ask which application to use to manage the received data).
+    r.set_header('Content-Type', 'application/vnd+cssi.vtsproject+zip') 
+    # Give the recommended filename for the received data (and give the mission name in it, as the filename structure is: vts-<mission-name>-content.vz).
     r.set_header('Content-Disposition', "attachment; filename='" + filename + "'")
+    # Expose the ContentDisposition header item (hence the recommended filename).
+    r.set_header('Access-Control-Expose-Headers', 'Content-Disposition')
+    # Do not restrict the request origin.
     r.set_header('Access-Control-Allow-Origin', '*')
     print(r)
     return r

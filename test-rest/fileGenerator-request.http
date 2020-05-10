@@ -24,10 +24,9 @@ content-type: application/json
 {
   "header": {
     "mission": "test-VTS",
-    "celestialbody": "EARTH",
+    "celestialBody": "EARTH",
     "timeStart": "2011-12-01T16:43:45",
     "timeEnd": "2011-12-02T16:43:45",
-    "celestialBody": "EARTH",
     "step": "10"
   },
   "constellation": [

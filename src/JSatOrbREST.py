@@ -426,7 +426,7 @@ def FileGenerationREST():
             res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))            
             showResponse(res)
 
-    except IOError as e:
+    except Exception as e:
         result = None
         errorMessage = str(e)
 

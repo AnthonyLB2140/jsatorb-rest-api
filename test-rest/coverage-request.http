@@ -16,8 +16,7 @@
 # -----------------------------------------------------------------------------
 
 
-## Send a request to generate several files for a cartesian
-## and a keplerian orbits
+## Send a request to generate several files for a keplerian orbit
 POST http://localhost:8000/vts HTTP/1.1
 content-type: application/json
 
@@ -119,6 +118,55 @@ content-type: application/json
       "limitsZone": [-90, 90, -180, 180],
       "nbLat": 180,
       "nbLong": 360,
+      "typePlot": "PERCENT_COV"
+    },
+    "CARTESIAN": {}
+  }
+}
+
+###
+
+## Send a request to generate several files for a keplerian
+## orbit in a specified region
+POST http://localhost:8000/vts HTTP/1.1
+content-type: application/json
+
+{
+  "header": {
+    "mission": "KepSatRegion",
+    "celestialBody": "EARTH",
+    "timeStart": "2011-12-01T16:43:45",
+    "timeEnd": "2011-12-02T16:43:45",
+    "step": "10"
+  },
+  "satellites": [
+    {"name": "KepSat",
+    "type": "keplerian",
+    "sma": 7000000,
+    "ecc": 0.007014455530245822,
+    "inc": 51,
+    "pa": 0,
+    "raan": 0,
+    "meanAnomaly": 0
+    }
+  ],
+  "constellations": [],
+  "groundStations": [
+    {"name": "sydney",
+    "latitude": -33.8678500,
+    "longitude": 151.2073200,
+    "altitude": 58,
+    "elevation": 12
+    }
+  ],
+  "options": {
+    "COVERAGE": {
+      "timeStart": "2011-12-01T16:43:45",
+      "timeEnd": "2011-12-02T16:43:45",
+      "step": 60,
+      "elevation": 0,
+      "nbSats": 1,
+      "limitsZone": [-30, 40, -90, 80],
       "typePlot": "PERCENT_COV"
     },
     "CARTESIAN": {}

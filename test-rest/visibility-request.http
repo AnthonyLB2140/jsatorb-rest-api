@@ -24,7 +24,7 @@ content-type: application/json
 {
   "header": {
     "timeStart": "2011-12-01T16:43:45",
-    "duration": "86400",
+    "timeEnd": "2011-12-02T16:43:45",
     "step": "60"
   },
   "satellites": [

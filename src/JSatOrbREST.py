@@ -140,7 +140,7 @@ def satelliteOEM():
     satellites = data['satellites']
     groundStations = data['groundStations']
     step = header['step']
-    duration = header['duration']
+    endDate = header['timeEnd']
 
     # Assign default value ('EARTH') if celestial body is undefined.
     if 'celestialBody' in header:
@@ -148,7 +148,7 @@ def satelliteOEM():
     else:
         celestialBody = 'EARTH'
         
-    newMission = HAL_MissionAnalysis(step, duration, celestialBody)    
+    newMission = HAL_MissionAnalysis(step, endDate, celestialBody)    
     if 'timeStart' in header:
         newMission.setStartTime(header['timeStart'])
 

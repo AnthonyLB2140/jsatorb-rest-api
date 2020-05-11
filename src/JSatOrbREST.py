@@ -22,6 +22,8 @@ sys.path.append('../jsatorb-common/src/VTS')
 sys.path.append('../jsatorb-common/src/file-conversion')
 # Add JSatOrb common module: Mission Data management
 sys.path.append('../jsatorb-common/src/mission-mgmt')
+# Add Coverage module
+sys.path.append('../jsatorb-coverage-service/src')
 
 import bottle
 from bottle import request, response
@@ -32,6 +34,8 @@ from FileGenerator import FileGenerator
 from VTSGenerator import VTSGenerator
 from ccsds2cic import ccsds2cic
 from MissionDataManager import writeMissionDataFile, loadMissionDataFile, listMissionDataFile, duplicateMissionDataFile, isMissionDataFileExists, deleteMissionDataFile
+from CoverageGenerator import CoverageGenerator
+from VTSGeneratorCoverage import VTSGeneratorCoverage
 from datetime import datetime
 import json
 
@@ -363,27 +367,50 @@ def FileGenerationREST():
 
         if 'celestialBody' not in header: header['celestialBody'] = 'EARTH'
         celestialBody = str( header['celestialBody'] )
-        
-        step = float( header['step'] )
-        startDate = str( header['timeStart'] )
-        endDate = str( header['timeEnd'] )
 
         if 'mission' not in header: header['mission'] = 'default_' + satellites[0]['name']
-        projectFolder = 'files/' + header['mission'] + '/'
-        dataFolder = projectFolder + 'Data/'
-        if not os.path.isdir(projectFolder):
-            os.mkdir(projectFolder)
-            os.mkdir(dataFolder)
-        elif not os.path.isdir(dataFolder):
-            os.mkdir(dataFolder)
-        copy_tree('files/Models', projectFolder+'Models')
 
-        fileGenerator = FileGenerator(startDate, endDate, step, celestialBody, satellites, groundStations, options)
-        fileGenerator.generate(dataFolder)
+        if "COVERAGE" in options:
+            optionsCoverage = options["COVERAGE"]
 
-        nameVtsFile = projectFolder + '/' + header['mission'] + '.vts'
-        vtsGenerator = VTSGenerator(nameVtsFile, 'mainModel.vts', '../jsatorb-common/src/VTS/')
-        vtsGenerator.generate(header, options, satellites, groundStations)
+            projectFolder = 'files/' + header['mission'] + '_coverage/'
+            dataFolder = projectFolder + 'Data/'
+            modelFolder = projectFolder + 'Models/'
+            if not os.path.isdir(projectFolder):
+                os.mkdir(projectFolder)
+                os.mkdir(dataFolder)
+            elif not os.path.isdir(dataFolder):
+                os.mkdir(dataFolder)
+            copy_tree('files/Models', modelFolder)
+
+            covGen = CoverageGenerator(celestialBody, satellites)
+            covGen.compute(optionsCoverage)
+            covGen.saveTypeData(modelFolder)
+
+            nameVtsFile = projectFolder + '/' + header['mission'] + '_coverage.vts'
+            vtsGenerator = VTSGeneratorCoverage(nameVtsFile, 'mainModelCoverage.vts', '../jsatorb-coverage-service/src/')
+            vtsGenerator.generate(header, options, groundStations)
+
+        else:
+            step = float( header['step'] )
+            startDate = str( header['timeStart'] )
+            endDate = str( header['timeEnd'] )
+
+            projectFolder = 'files/' + header['mission'] + '/'
+            dataFolder = projectFolder + 'Data/'
+            if not os.path.isdir(projectFolder):
+                os.mkdir(projectFolder)
+                os.mkdir(dataFolder)
+            elif not os.path.isdir(dataFolder):
+                os.mkdir(dataFolder)
+            copy_tree('files/Models', projectFolder+'Models')
+
+            fileGenerator = FileGenerator(startDate, endDate, step, celestialBody, satellites, groundStations, options)
+            fileGenerator.generate(dataFolder)
+
+            nameVtsFile = projectFolder + '/' + header['mission'] + '.vts'
+            vtsGenerator = VTSGenerator(nameVtsFile, 'mainModel.vts', '../jsatorb-common/src/VTS/')
+            vtsGenerator.generate(header, options, satellites, groundStations)
 
         result = ""
         errorMessage = 'Files generated'
@@ -399,7 +426,7 @@ def FileGenerationREST():
             res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))            
             showResponse(res)
 
-    except Exception as e:
+    except IOError as e:
         result = None
         errorMessage = str(e)
 

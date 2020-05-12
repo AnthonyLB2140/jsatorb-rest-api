@@ -60,12 +60,12 @@ content-type: application/json
     "elevation": 12
     }
   ],
-  "options": [
-    "CARTESIAN",
-    "KEPLERIAN",
-    "ATTITUDE",
-    "ECLIPSE"
-  ]
+  "options": {
+    "CARTESIAN": {},
+    "KEPLERIAN": {},
+    "ATTITUDE": {"law": "LOF_LVLH"},
+    "ECLIPSE": {}
+  }
 }
 
 ###
@@ -95,12 +95,12 @@ content-type: application/json
     "elevation": 12
     }
   ],
-  "options": [
-    "CARTESIAN",
-    "ATTITUDE",
-    "KEPLERIAN",
-    "ECLIPSE"
-  ]
+  "options": {
+    "CARTESIAN": {},
+    "ATTITUDE": {"law": "POINTING_CENTRAL"},
+    "KEPLERIAN": {},
+    "ECLIPSE": {}
+  }
 }
 
 ###
@@ -141,11 +141,12 @@ content-type: application/json
     "elevation": 12
     }
   ],
-  "options": [
-    "CARTESIAN",
-    "LLA",
-    "VISIBILITY"
-  ]
+  "options": {
+    "CARTESIAN": {},
+    "LLA": {},
+    "VISIBILITY": {},
+    "ATTITUDE": {"law": "NADIR"}
+  }
 }
 
 ###
@@ -173,10 +174,11 @@ content-type: application/json
   ],
   "groundStations": [
   ],
-  "options": [
-    "CARTESIAN",
-    "LLA"
-  ]
+  "options": {
+    "CARTESIAN": {},
+    "LLA": {},
+    "ATTITUDE": {"law": "POINTING_SUN"}
+  }
 }
 
 ###
@@ -204,9 +206,9 @@ content-type: application/json
   ],
   "groundStations": [
   ],
-  "options": [
-    "ECLIPSE"
-  ]
+  "options": {
+    "ECLIPSE": {}
+  }
 }
 
 ###
@@ -236,8 +238,8 @@ content-type: application/json
   ],
   "groundStations": [
   ],
-  "options": [
-    "CARTESIAN",
-    "ECLIPSE"
-  ]
+  "options": {
+    "CARTESIAN": {},
+    "ECLIPSE": {}
+  }
 }

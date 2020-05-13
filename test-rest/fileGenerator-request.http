@@ -111,9 +111,9 @@ content-type: application/json
 
 {
   "header": {
-    "timeStart": "2030-12-01T16:43:45",
-    "timeEnd": "2030-12-02T16:43:45",
-    "step": "100"
+    "timeStart": "2020-12-01T16:43:45",
+    "timeEnd": "2020-12-02T16:43:45",
+    "step": "10"
   },
   "satellites": [
     {"name": "KepSat2",
@@ -190,15 +190,15 @@ content-type: application/json
 {
   "header": {
     "timeStart": "2020-04-19T11:29:10.811",
-    "timeEnd":  "2020-04-24T11:29:10.811",
-    "step": "0.1"
+    "timeEnd":  "2020-04-20T11:29:10.811",
+    "step": "1"
   },
   "satellites": [
     {"name": "LEO",
     "type": "keplerian",
     "sma": 6778137,
-    "ecc": 0,
-    "inc": 51.60000000000001,
+    "ecc": 0.2,
+    "inc": 51.6,
     "pa": 0,
     "raan": 0,
     "meanAnomaly": 0
@@ -207,7 +207,9 @@ content-type: application/json
   "groundStations": [
   ],
   "options": {
-    "ECLIPSE": {}
+    "CARTESIAN": {},
+    "ATTITUDE": {"law": "NADIR"},
+    "LLA": {}
   }
 }
 

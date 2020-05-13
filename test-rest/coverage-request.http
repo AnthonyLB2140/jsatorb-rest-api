@@ -54,11 +54,10 @@ content-type: application/json
       "timeEnd": "2011-12-02T16:43:45",
       "step": 60,
       "elevation": 0,
-      "nbSats": 1,
-      "limitsZone": [-90, 90, -180, 180],
-      "nbLat": 180,
-      "nbLong": 360,
-      "typePlot": "PERCENT_COV"
+      "nbSatsToCover": 1,
+      "regionLatitudes": [-90, 90],
+      "regionLongitudes": [-180, 180],
+      "plotType": "PERCENT_COV"
     },
     "CARTESIAN": {}
   }
@@ -114,11 +113,10 @@ content-type: application/json
       "timeEnd": "2011-12-02T16:43:45",
       "step": 60,
       "elevation": 0,
-      "nbSats": 1,
-      "limitsZone": [-90, 90, -180, 180],
-      "nbLat": 180,
-      "nbLong": 360,
-      "typePlot": "PERCENT_COV"
+      "nbSatsToCover": 1,
+      "regionLatitudes": [-90, 90],
+      "regionLongitudes": [-180, 180],
+      "plotType": "PERCENT_COV"
     },
     "CARTESIAN": {}
   }
@@ -165,9 +163,10 @@ content-type: application/json
       "timeEnd": "2011-12-02T16:43:45",
       "step": 60,
       "elevation": 0,
-      "nbSats": 1,
-      "limitsZone": [-30, 40, -90, 80],
-      "typePlot": "PERCENT_COV"
+      "nbSatsToCover": 1,
+      "regionLatitudes": [-30, 40],
+      "regionLongitudes": [-90, 80],
+      "plotType": "PERCENT_COV"
     },
     "CARTESIAN": {}
   }
@@ -206,11 +205,10 @@ content-type: application/json
       "timeEnd":  "2020-04-20T11:29:10.811",
       "step": "60",
       "elevation": 0,
-      "nbSats": 1,
-      "limitsZone": [-90, 90, -180, 180],
-      "nbLat": 180,
-      "nbLong": 360,
-      "typePlot": "PERCENT_COV"
+      "nbSatsToCover": 1,
+      "regionLatitudes": [-90, 90],
+      "regionLongitudes": [-180, 180],
+      "plotType": "PERCENT_COV"
     }
   }
 }

@@ -20,3 +20,5 @@ Starts and ends of eclipse periods for a satellite
 ## 'VISIBILITY'
 Starts and ends of visibility periods for a satellite and a ground station
 
+## 'COVERAGE'
+Plot a coverage map for a given region, but exclusive (if given, compute only Coverage)

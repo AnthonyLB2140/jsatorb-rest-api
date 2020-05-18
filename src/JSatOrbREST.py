@@ -22,12 +22,15 @@ sys.path.append('../jsatorb-common/src/VTS')
 sys.path.append('../jsatorb-common/src/file-conversion')
 # Add JSatOrb common module: Mission Data management
 sys.path.append('../jsatorb-common/src/mission-mgmt')
+# Add Constellation generator module
+sys.path.append('../jsatorb-common/src/constellation')
 # Add Coverage module
 sys.path.append('../jsatorb-coverage-service/src')
 
 import bottle
 from bottle import request, response
 from MissionAnalysis import HAL_MissionAnalysis
+from WalkerConstellation import WalkerConstellation
 from DateConversion import HAL_DateConversion
 from EclipseCalculator import HAL_SatPos, EclipseCalculator
 from FileGenerator import FileGenerator
@@ -260,6 +263,39 @@ def DateConversionREST():
         # Return json with converted date in 'dateConverted'
 
         result = newDate.getDateTime()
+        errorMessage = ''
+    except Exception as e:
+        result = None
+        errorMessage = str(e)
+
+    res = json.dumps(buildSMDResponse(boolToRESTStatus(result!=None), errorMessage, result))
+    showResponse(res)
+    return res
+
+# -----------------------------------------------------------------------------
+# MODULE        : jsatorb-constellation-generator
+# ROUTE         : /constellationgenerator
+# FUNCTIONNALITY: Generates a satelittes constellation, according to a set
+#                 of parameters.
+# -----------------------------------------------------------------------------
+@app.route('/constellationgenerator', method=['OPTIONS', 'POST'])
+@enable_cors
+def ConstellationGeneratorREST():
+    response.content_type = 'application/json'
+
+    data = request.json
+    showRequest(json.dumps(data))
+
+    try:
+        header = data['header']
+
+        # Give directly the header part of the request, as the arguments/parameter
+        # names are the same that the one expected in the constellation generator.
+        generator = WalkerConstellation(header)
+
+        # The generator returned data can be directly put into the JSON data part of the HTTP response.
+        result = generator.generate()
+
         errorMessage = ''
     except Exception as e:
         result = None

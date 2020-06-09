@@ -179,7 +179,7 @@ content-type: application/json
 # MISSION EXAMPLES: SUN-SYNCHRONOUS AND MARS MISSION DATA SET SAVE REQUESTS 
 # -----------------------------------------------------------------------------
 
-## Send a complete request for an Sun-synchronous orbit
+## Send a request for an Sun-synchronous orbit
 POST http://localhost:8000/missiondata/Mission-Sun-synchronous HTTP/1.1
 content-type: application/json
 

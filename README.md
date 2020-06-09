@@ -1,9 +1,9 @@
-# JSatOrb REST API
+# JSatOrb project: JSatOrb REST API
 
-The JSatOrb REST API gathers all backend modules functionnalities into one portal of services.
-The REST API is a Web server accepting HTTP requests in JSON format and returning either JSON or binary responses, depending on the request type (all the VTS data responses are compressed binary responses).
+The JSatOrb REST API gathers all backend modules functionnalities into one portal of services. 
+The REST API is a Web server accepting HTTP requests in JSON format and returning either JSON or binary responses, depending on the request type (all the VTS data responses are compressed binary responses).  
 
-The JSatOrbREST.py Python module contains all the REST services and is self-documented.
+The __JSatOrbREST.py__ Python module contains all the REST services and is self-documented.
 
 ## Prerequisites
 
@@ -32,13 +32,18 @@ By default the service is going to run on the **port 8000**.
 
 ## Run the tests
 
-The JSatOrb REST API does not provide functional tests, as they already are provided in the functional modules called by the REST API.
-However, technical tests are provided in the form of sample REST requests.
-Thoses requests are to be found in the test-rest folder, in all the *.http files.
+The JSatOrb REST API does not provide functional tests, as they already are provided in the functional modules called by the REST API.  
+However, technical tests are provided in the form of sample REST requests.  
+Thoses requests are to be found in the test-rest folder, in all the *.http files.  
 
-In order to use those sample requests, one has to have the REST Client extension available in its VSCode IDE.
+In order to use those sample requests, one has to have the REST Client extension available in its VSCode IDE.  
 This is described in the developer documentation (see user installation archive: _doc/dev/dev-install.md_).
 
+
+## Request examples
+
+A complete set of request examples covering the whole JSatOrb REST API functionnalities can be found in the __./test-rest/ folder__,  
+but a sample of request examples is presented below, covering various REST API functionnalities.
 
 ## Date conversion module request example
 

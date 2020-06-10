@@ -110,7 +110,7 @@ Route : /propagation/visibility', POST method
   "header": {
     "timeStart": "2011-12-01T16:43:45",
     "step": 60,
-    "duration": 86400
+    "timeEnd": "2011-12-02T16:43:45"
   },
   "groundStations":[
   	{	
@@ -157,7 +157,29 @@ Route : /propagation/visibility', POST method
   ]
 }
 ```
-## Visibility:Ephemerids module request example
-Route : /propagation/satellites', POST method
 
-__To be completed: this functionnality, provided by ISAE/Supaero, needs to be investigated to understand its purpose.__
+
+## Visibility: Ephemerids module request example
+
+Route : /propagation/satellites', POST method
+```json
+{
+  "header": {
+    "timeStart": "2010-09-15T16:43:45",
+    "step": 60,
+    "timeEnd": "2010-09-16T16:43:45"
+  },
+  "satellites" : [
+        {
+      "name": "Lucien-Sat",
+      "type": "keplerian",
+      "sma": "7128137.0",
+      "ecc": "0.007014455530245822",
+      "inc": "98.55",
+      "pa": "90.0",
+      "raan": "5.191699999999999",
+      "meanAnomaly": "359.93"
+    }
+  ]
+}
+```

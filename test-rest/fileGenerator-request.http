@@ -191,7 +191,7 @@ content-type: application/json
   "header": {
     "timeStart": "2020-04-19T11:29:10.811",
     "timeEnd":  "2020-04-20T11:29:10.811",
-    "step": "1"
+    "step": "10"
   },
   "satellites": [
     {"name": "LEO",

@@ -213,7 +213,7 @@ def EclipseCalculatorREST():
             vy = float( sat['vy'] )
             vz = float( sat['vz'] )
             calculator = EclipseCalculator(HAL_SatPos(x, y, z, vx, vy, vz, 'cartesian'), 
-                datetime.strptime(stringDate, stringDateFormat), duration)
+                datetime.strptime(stringDate, stringDateFormat), datetime.strptime(stringDateEnd, stringDateFormat))
             res = eclipseToJSON( calculator.getEclipse() )
 
         else:

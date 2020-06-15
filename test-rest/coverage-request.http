@@ -76,7 +76,7 @@ content-type: application/json
     "celestialBody": "EARTH",
     "timeStart": "2011-12-01T16:43:45",
     "timeEnd": "2011-12-02T16:43:45",
-    "step": "10"
+    "step": "60"
   },
   "satellites": [
     {"name": "KepSat",

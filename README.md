@@ -30,6 +30,28 @@ python src/JSatOrbREST.py
 By default the service is going to run on the **port 8000**.
 
 
+## Troubleshooting
+
+__Problem:__ If one of the following errors appears when launching the service:
+```
+Import error: libjava.so: cannot open shared object file: No such file or directory
+```
+OR
+```
+Import error: libjvm.so: cannot open shared object file: No such file or directory
+```
+
+__Solution:__ Add the following folders into the LD_LIBRARY_PATH environment variable:
+
+`/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64`
+`/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server`
+
+For instance, you can add in your ~/.bashrc or in your ~/customize.bash the following declaration:
+```
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64:/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/server"
+```
+
+
 ## Run the tests
 
 The JSatOrb REST API does not provide functional tests, as they already are provided in the functional modules called by the REST API.  

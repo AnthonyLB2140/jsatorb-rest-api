@@ -6,7 +6,7 @@ ORIGINATOR = ISAE-SUPAERO
 META_START
 OBJECT_NAME = {{ key }}
 OBJECT_ID = {{ key }}
-CENTER_NAME = Earth
+CENTER_NAME = {{ celestialBody }}
 REF_FRAME = EME2000
 TIME_SYSTEM = UTC
 START_TIME = {{ value[0]['epoch'] }}
@@ -18,7 +18,6 @@ INTERPOLATION_DEGREE = 5
 META_STOP
 
 {% for data in value %}
-{{ data['epoch'] }} {{ '%.7e' % data['x'] }} {{ '%.7e' % data['y'] }} {{ '%.7e' % data['z'] }} {{ '%.7e' % data['vx'] }} {{ '%.7e' % data['vy'] }} {{ '%.7e' % data['vz'] }}
-{% endfor %}
+{{ data['epoch'] }} {{ '%.7e' % data['x'] }} {{ '%.7e' % data['y'] }} {{ '%.7e' % data['z'] }} {{ '%.7e' % data['vx'] }} {{ '%.7e' % data['vy'] }} {{ '%.7e' % data['vz'] }}{% endfor %}
 
 {% endfor %}

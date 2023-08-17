@@ -374,7 +374,11 @@ def zipped_vts_response(vts_folder, mission):
     r.set_header('Access-Control-Expose-Headers', 'Content-Disposition')
     # Do not restrict the request origin.
     r.set_header('Access-Control-Allow-Origin', '*')
+    #New header by EAE to warn nodered that VTS should be restarted
+    r.set_header('vtsFlag', 'ready') 
     print(r)
+    
+    
     return r
 
 # -----------------------------------------------------------------------------------------
@@ -394,13 +398,14 @@ def FileGenerationREST():
     #response.content_type = 'application/json'
     data = request.json
     showRequest(json.dumps(data))
-
+  #  print(data)
     try:
         header = data['header']
+        print(header)
         satellites = data['satellites']
         groundStations = data['groundStations']
         options = data['options']
-
+        
         if 'celestialBody' not in header: header['celestialBody'] = 'EARTH'
         celestialBody = str( header['celestialBody'] )
 
@@ -431,7 +436,8 @@ def FileGenerationREST():
             step = float( header['step'] )
             startDate = str( header['timeStart'] )
             endDate = str( header['timeEnd'] )
-
+            print("startDate")
+            print(startDate)
             projectFolder = 'files/' + header['mission'] + '/'
             dataFolder = projectFolder + 'Data/'
             if not os.path.isdir(projectFolder):
@@ -443,11 +449,14 @@ def FileGenerationREST():
 
             fileGenerator = FileGenerator(startDate, endDate, step, celestialBody, satellites, groundStations, options)
             fileGenerator.generate(dataFolder)
-
+            header['timeStart'] = startDate # 180723 Trying to force the start date in config 
             nameVtsFile = projectFolder + '/' + header['mission'] + '.vts'
             vtsGenerator = VTSGenerator(nameVtsFile, 'mainModel.vts', '../jsatorb-common/src/VTS/')
             vtsGenerator.generate(header, options, satellites, groundStations)
-
+            
+            print("No Coverage")
+            print(header)
+            
         result = ""
         errorMessage = 'Files generated'
 
